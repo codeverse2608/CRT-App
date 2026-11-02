@@ -62,7 +62,7 @@ input[type=file]::file-selector-button{background:linear-gradient(135deg,var(--a
 <body>
 <main>
 <h1>🎓 ExamPrep</h1>
-
+<p class="mut">Works fully in your browser. No sign-in, no key, no AI service, and your notes never leave your device.</p>
 
 <div class="card">
   <h2>Your notes</h2>
@@ -216,12 +216,12 @@ function ask(){const er=$("#c-err"),q=$("#c-in").value.trim();if(!q||need(er))re
   const hits=n.sents.map((s,i)=>[n.toks(s).reduce((a,w)=>a+(qt.has(w)?1/Math.log(2+n.f[w]):0),0),i]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>n.sents[x[1]]);
   $("#c-log").appendChild(E("div","msg u",q));const card=E("div","msg");$("#c-log").appendChild(card);
   if(!hits.length){card.textContent="I couldn’t find that in your notes. Try different words from your material.";return;}
-  const rec={d:today(),full:false};S.chats.push(rec);save();
+  const rec={d:today(),full:false,s:0};S.chats.push(rec);save();
   const terms=[...new Set(hits.flatMap(h=>n.toks(h)))].filter(w=>!qt.has(w)).sort((a,b)=>n.f[b]-n.f[a]);
   const steps=[`Hint 1: think about ${terms.slice(0,3).join(", ")}.`,`Hint 2: ${mask(hits[0],terms[0]||"xxxx")}`,"Full answer from your notes:\n- "+hits.join("\n- ")];
   let k=0;const txt=E("div",0,steps[0]),b1=E("button",0,"Next hint"),b2=E("button",0,"Show full answer");
-  b1.onclick=()=>{k=Math.min(k+1,1);txt.textContent=steps.slice(0,k+1).join("\n");};
-  b2.onclick=()=>{txt.textContent=steps.join("\n");rec.full=true;save();b1.hidden=b2.hidden=true;};
+  b1.onclick=()=>{k=Math.min(k+1,1);rec.s=Math.max(rec.s,k);save();txt.textContent=steps.slice(0,k+1).join("\n");};
+  b2.onclick=()=>{txt.textContent=steps.join("\n");rec.full=true;rec.s=2;save();b1.hidden=b2.hidden=true;};
   card.append(txt,b1," ",b2);}
 $("#c-go").onclick=ask;$("#c-in").onkeydown=e=>{if(e.key==="Enter")ask();};
 
@@ -241,21 +241,29 @@ function repData(){const m=today().slice(0,7),qs=S.quizzes.filter(q=>q.d.slice(0
   qs.forEach(q=>{(by[q.t]=by[q.t]||[0,0]);by[q.t][0]+=q.c;by[q.t][1]+=q.n;});
   const wk=new Date(Date.now()-7*864e5).toISOString().slice(0,10),rc=S.chats.filter(c=>c.d>=wk),fs=rc.filter(c=>c.full).length,
     half=Math.floor(qs.length/2),rate=a=>a.reduce((x,q)=>x+q.c,0)/a.reduce((x,q)=>x+q.n,0);
-  return{m,by,rc,fs,growth:qs.length>=2?rate(qs.slice(half))-rate(qs.slice(0,half)):null,alert:rc.length>40||(rc.length>=5&&fs/rc.length>.5),
+  const W=[.2,.5,1],st=c=>c.s!==undefined?c.s:(c.full?2:0),mo=S.chats.filter(c=>c.d.slice(0,7)===m),
+    dep=mo.length?Math.round(mo.reduce((a,c)=>a+W[st(c)],0)/mo.length*100):null,cnt=[0,1,2].map(i=>mo.filter(c=>st(c)===i).length);
+  return{m,by,rc,fs,dep,mo:mo.length,cnt,growth:qs.length>=2?rate(qs.slice(half))-rate(qs.slice(0,half)):null,alert:rc.length>40,
     weak:Object.entries(S.weak).sort((a,b)=>b[1]-a[1]).slice(0,8),
     cov:S.syllabus.split(/\n|;/).map(x=>x.trim()).filter(Boolean).map(l=>{const t=nlp().toks(l);return[l,t.length?t.filter(w=>nlp().f[w]).length/t.length:0];})};}
+const depLevel=p=>p<35?["Low","--ok","Good balance: you’re working things out yourself."]:p<=65?["Moderate","--warn","You open full answers fairly often. Try one more hint before showing the answer."]:["High","--bad","You rely heavily on full answers. Attempt the question yourself and use the hints first."];
 function report(){const r=repData(),o=$("#r-out");o.innerHTML="";
   const add=(t,c)=>o.appendChild(E("p",c,t));
+  if(r.dep===null)add("AI dependency: no chat questions asked this month yet.","mut");
+  else{const L=depLevel(r.dep),box=E("div"),bar=E("div","bar"),i=E("i");
+    box.appendChild(E("h2",0,`AI dependency: ${r.dep}% (${L[0]})`));i.style.width=Math.max(r.dep,3)+"%";i.style.background=`var(${L[1]})`;bar.appendChild(i);box.appendChild(bar);
+    box.appendChild(E("p","mut",`Questions asked this month: ${r.mo}. Solved with the first hint: ${r.cnt[0]}. Needed the second hint: ${r.cnt[1]}. Opened the full answer: ${r.cnt[2]}.`));
+    box.appendChild(E("p",0,L[2]));o.appendChild(box);}
+  if(r.alert)add(`⚠ Very frequent chat use this week: ${r.rc.length} questions.`,"warn");
   if(!Object.keys(r.by).length)add("Take some quizzes first.","mut");
   Object.entries(r.by).forEach(([t,[c,n]])=>{const a=c/n,d=E("div");d.style.margin="8px 0";d.appendChild(E("div",0,`${t}: ${Math.round(a*100)}%`+(a<.6?"  ⚠ weak topic":"")));
     const b=E("div","bar"),i=E("i");i.style.width=a*100+"%";b.appendChild(i);d.appendChild(b);o.appendChild(d);});
   if(r.growth!==null)add(`Performance growth this month: ${r.growth>=0?"+":""}${Math.round(r.growth*100)}%`);
   if(r.weak.length)add("Weak terms (most missed): "+r.weak.map(([w,c])=>`${w} (${c})`).join(", "));
-  if(r.alert)add(`⚠ Heavy shortcut use: ${r.rc.length} questions this week, ${r.fs} used the full answer. Try the hints first.`,"warn");
   if(r.cov.length){add("Syllabus coverage by your notes:");r.cov.forEach(([l,v])=>add((v>=.5?"✓ ":"✗ ")+l,v>=.5?"good":"bad"));}}
 $("#r-dl").onclick=()=>{const r=repData();let t=`ExamPrep report ${r.m}\n`;
   Object.entries(r.by).forEach(([k,[c,n]])=>t+=`${k}: ${Math.round(c/n*100)}% (${c}/${n})\n`);
-  if(r.weak.length)t+="Weak terms: "+r.weak.map(x=>x[0]).join(", ")+"\n";if(r.alert)t+="ALERT: heavy shortcut use\n";
+  if(r.weak.length)t+="Weak terms: "+r.weak.map(x=>x[0]).join(", ")+"\n";t+=r.dep===null?"AI dependency: no chat questions this month\n":`AI dependency: ${r.dep}% (${depLevel(r.dep)[0]}) - ${r.mo} questions, ${r.cnt[0]} first hint, ${r.cnt[1]} second hint, ${r.cnt[2]} full answers\n`;
   r.cov.forEach(([l,v])=>t+=`${v>=.5?"covered":"MISSING"}: ${l}\n`);
   const a=E("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));a.download=`report_${r.m}.txt`;a.click();};
 $("#r-clr").onclick=()=>{if(confirm("Delete all quiz and chat history?")){S.quizzes=[];S.levels={};S.chats=[];S.weak={};save();report();$("#q-topic").oninput();}};
