@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ExamPrep</title>
+<style>
+:root{--bg:rgba(8,6,30,.45);--card:rgba(255,255,255,.08);--bd:rgba(255,255,255,.2);--tx:#f6f4ff;--mut:#c4c0ee;--ac:#ff6bd6;--ac2:#6b8cff;--ok:#5eead4;--bad:#ff9a9a;--warn:#ffd166}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;
+background:linear-gradient(-45deg,#0f0c29,#302b63,#1b2a6b,#3a1c71);background-size:400% 400%;animation:bg 18s ease infinite;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(70px);opacity:.45;animation:float 14s ease-in-out infinite}
+body::before{width:380px;height:380px;background:#ff6bd6;top:-100px;left:-100px}
+body::after{width:420px;height:420px;background:#4cc9f0;bottom:-140px;right:-120px;animation-delay:-7s}
+@keyframes bg{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+@keyframes pop{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+main{max-width:880px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:2.3rem;margin:.1em 0;letter-spacing:-.5px;background:linear-gradient(90deg,#fff,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+h2{font-size:1.15rem;margin:.1em 0 .7em}
+a{color:var(--ok)}
+.card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--bd);border-radius:22px;padding:18px;margin:14px 0;box-shadow:0 10px 35px rgba(0,0,0,.25);animation:up .5s ease both}
+nav{display:flex;gap:8px;overflow-x:auto;padding:6px 2px}
+nav button{white-space:nowrap}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+button{background:rgba(255,255,255,.1);border:1px solid var(--bd);border-radius:999px;padding:8px 16px;cursor:pointer;margin:3px 0;transition:transform .15s,box-shadow .2s,background .2s}
+button:hover{transform:translateY(-2px);background:rgba(255,255,255,.2)}
+button.on,button.go{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 20px rgba(255,107,214,.35)}
+button.go:hover,button.on:hover{box-shadow:0 8px 26px rgba(107,140,255,.55)}
+input[type=text],textarea,select{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:10px 12px;margin:4px 0;transition:border-color .2s,box-shadow .2s}
+input[type=text]:focus,textarea:focus,select:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 3px rgba(255,107,214,.3)}
+::placeholder{color:#a9a5d8}
+input[type=file]{color:var(--mut)}
+input[type=file]::file-selector-button{background:linear-gradient(135deg,var(--ac2),var(--ac));color:#fff;border:0;border-radius:999px;padding:8px 16px;margin-right:10px;cursor:pointer;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>input[type=text]{flex:1;min-width:160px;width:auto}
+.out{white-space:pre-wrap;margin-top:12px;padding:12px;border-radius:14px;background:var(--bg);animation:pop .3s ease}.out:empty{display:none}
+.mut{color:var(--mut);font-size:.92rem}.err{color:var(--bad);margin-top:6px}.warn{color:var(--warn);font-weight:600}
+.q{margin:14px 0;animation:up .4s ease both}
+.q label{display:block;padding:10px 14px;margin:6px 0;border:1px solid var(--bd);border-radius:14px;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+.q label:hover{background:rgba(255,255,255,.12);transform:translateX(4px)}
+.q label:has(input:checked){border-color:var(--ac);background:rgba(255,107,214,.18)}
+.q input{accent-color:var(--ac);margin-right:6px}
+.good{color:var(--ok)}.bad{color:var(--bad)}
+.bar{height:12px;background:rgba(255,255,255,.12);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac2),var(--ac));border-radius:8px;animation:pop .8s ease}
+.tree ul{list-style:none;margin:6px 0;padding-left:20px;border-left:2px dashed var(--bd)}
+.tree li>b{display:inline-block;border-radius:999px;padding:3px 12px;margin:3px 0;font-weight:600;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;animation:pop .4s ease both}
+.tree ul ul>li>b{background:rgba(255,255,255,.12);border:1px solid var(--bd);font-weight:500}
+.tree ul ul ul>li>b{background:transparent;border:1px dashed var(--bd);font-weight:400}
+.tree{counter-reset:s}
+.step{counter-increment:s;position:relative;padding:12px 12px 12px 52px;text-align:left;border:1px solid var(--bd);border-radius:16px;background:var(--bg);animation:up .4s ease both}
+.step::before{content:counter(s);position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:linear-gradient(135deg,var(--ac),var(--ac2))}
+.arrow{text-align:center;color:var(--ac);font-size:1.3rem;animation:bob 1.4s ease-in-out infinite}
+.msg{padding:10px 14px;border-radius:18px 18px 18px 4px;margin:8px 0;white-space:pre-wrap;border:1px solid var(--bd);background:var(--card);animation:pop .3s ease;max-width:92%}
+.msg.u{margin-left:auto;border-radius:18px 18px 4px 18px;background:linear-gradient(135deg,rgba(255,107,214,.35),rgba(107,140,255,.35))}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<h1>🎓 ExamPrep</h1>
+
+
+<div class="card">
+  <h2>Your notes</h2>
+  <input type="file" id="file" accept=".pdf,.txt,.md">
+  <textarea id="paste" rows="3" placeholder="…or paste your notes here"></textarea>
+  <div id="nstat" class="mut"></div>
+  <button id="n-del">🗑 Delete notes</button> <button id="n-sample">Load sample notes</button>
+</div>
+
+<nav id="tabs"></nav>
+
+<section id="t-notes" class="card"><h2>Brief notes</h2>
+  <div class="row"><input type="text" id="n-topic" placeholder="Topic word (optional)"><button class="go" id="n-go">Summarise</button></div>
+  <div id="n-out" class="out"></div><div class="err" id="n-err"></div></section>
+
+<section id="t-quiz" class="card" hidden><h2>Adaptive quiz</h2>
+  <div class="row"><input type="text" id="q-topic" placeholder="Topic word (optional)"><button class="go" id="q-go">New quiz</button></div>
+  <div class="mut" id="q-lv"></div><div id="q-box"></div><div class="err" id="q-err"></div></section>
+
+<section id="t-chat" class="card" hidden><h2>Doubt solving (hints first)</h2>
+  <p class="mut">Ask a question. Answers come from your notes, one hint at a time, and the full answer only when you ask.</p>
+  <div id="c-log"></div>
+  <div class="row"><input type="text" id="c-in" placeholder="Ask a question about your notes"><button class="go" id="c-go">Ask</button></div>
+  <div class="err" id="c-err"></div></section>
+
+<section id="t-vis" class="card" hidden><h2>Mind map &amp; flowchart</h2>
+  <div class="row"><input type="text" id="v-topic" placeholder="Topic word (optional)"><select id="v-kind" style="width:auto"><option value="map">Mind map</option><option value="flow">Flowchart</option></select><button class="go" id="v-go">Draw</button></div>
+  <div id="v-out" class="tree" style="margin-top:10px"></div><div class="err" id="v-err"></div></section>
+
+<section id="t-rep" class="card" hidden><h2>Monthly progress report</h2>
+  <div id="r-out"></div>
+  <div class="row"><button id="r-dl">Download report</button><button id="r-clr">🗑 Clear history</button></div></section>
+
+<section id="t-set" class="card" hidden><h2>Syllabus</h2>
+  <textarea id="syl" rows="7" placeholder="Paste course outcomes, one per line. The report shows which ones your notes cover."></textarea>
+  <button id="s-del">🗑 Delete syllabus</button></section>
+<section id="t-room" class="card" hidden><h2>👥 Virtual study room</h2>
+  <p class="mut">Enter a meeting code and press Join. Everyone who uses the same code lands in the same free video room, with chat and screen sharing.</p>
+  <div class="row"><input type="text" id="rm-code" placeholder="Meeting code (e.g. ABC123)" maxlength="20"><button class="go" id="rm-join">Join room</button><button id="rm-new">🎲 New code</button></div>
+  <div class="row"><button id="rm-copy">🔗 Copy invite link</button></div>
+  <div class="mut" id="rm-info"></div></section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),E=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+let S={notes:"",syllabus:"",quizzes:[],levels:{},chats:[],weak:{}};
+try{Object.assign(S,JSON.parse(localStorage.getItem("ep2")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("ep2",JSON.stringify(S))}catch(e){}};
+const today=()=>new Date().toISOString().slice(0,10),shuf=a=>a.sort(()=>Math.random()-.5);
+const STOP=new Set("this that with from have been were will would could should their there which about into than then them they what when where while also such these those your more most some very other only over each both many much must can may not but and the for are was has had its our out any all one two who how why does did you".split(" "));
+
+// tabs
+[["notes","📝 Notes"],["quiz","🧠 Quiz"],["chat","💬 Chat"],["vis","🗺️ Visuals"],["rep","📊 Report"],["set","🎯 Syllabus"],["room","👥 Study Room"]].forEach(([id,l],i,all)=>{
+  const b=E("button",i?"":"on",l);b.onclick=()=>{all.forEach(([t])=>$("#t-"+t).hidden=t!==id);[...$("#tabs").children].forEach(x=>x.className=x===b?"on":"");if(id==="rep")report();};$("#tabs").appendChild(b);});
+
+// text analysis (simple word counting, runs in your browser)
+let NL=null,NLsrc=null;
+function nlp(){
+  if(NL&&NLsrc===S.notes)return NL;NLsrc=S.notes;
+  const toks=x=>(x.toLowerCase().match(/[a-z][a-z-]{3,}/g)||[]).filter(w=>!STOP.has(w));
+  const sents=S.notes.replace(/\s+/g," ").split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(x=>x.length>30&&x.length<320);
+  const f={};sents.forEach(s=>new Set(toks(s)).forEach(w=>f[w]=(f[w]||0)+1));
+  const kws=Object.keys(f).sort((a,b)=>f[b]-f[a]||b.length-a.length);
+  const sc=sents.map(s=>{const t=[...new Set(toks(s))];return t.reduce((a,w)=>a+f[w],0)/Math.sqrt(t.length||1);});
+  return NL={sents,toks,f,kws,sc};
+}
+const pick=t=>{const n=nlp();let idx=n.sents.map((s,i)=>i);if(t){const m=idx.filter(i=>n.sents[i].toLowerCase().includes(t));if(m.length)idx=m;}return idx;};
+const mask=(s,w)=>s.replace(new RegExp("\\b"+w+"\\b","i"),"_____");
+function need(el){if(!nlp().sents.length){el.textContent="Upload or paste notes first (or press “Load sample notes”).";return true;}el.textContent="";return false;}
+
+// notes input
+function nstat(){const n=S.notes.length;$("#nstat").textContent=n?`Notes loaded (${n.toLocaleString()} characters).`:"No notes yet.";}
+$("#paste").value=S.notes;$("#syl").value=S.syllabus;nstat();
+function clearGenerated(){["#n-out","#q-box","#c-log","#v-out"].forEach(i=>$(i).innerHTML="");["#n-err","#q-err","#c-err","#v-err"].forEach(i=>$(i).textContent="");quiz=[];S.weak={};save();}
+function clearNotes(){S.notes="";$("#paste").value="";$("#file").value="";clearGenerated();nstat();}
+$("#paste").oninput=e=>{S.notes=e.target.value.slice(0,200000);if(!S.notes.trim())clearGenerated();save();nstat();};
+$("#syl").oninput=e=>{S.syllabus=e.target.value;save();};
+$("#n-del").onclick=clearNotes;
+$("#s-del").onclick=()=>{S.syllabus="";$("#syl").value="";save();};
+$("#n-sample").onclick=()=>{clearGenerated();$("#file").value="";S.notes="An operating system manages hardware resources and provides services to application programs. The kernel is the core of the operating system and runs with full access to the hardware. A process is a program in execution and has its own address space and state. The scheduler decides which process runs on the processor at any moment. Round robin scheduling gives every process a fixed time slice in turn. Virtual memory lets a process use more memory than the physical memory installed in the computer. Paging divides memory into fixed size pages so that physical memory can be allocated without external fragmentation. A page fault occurs when a process accesses a page that is not currently in physical memory. Deadlock happens when processes wait forever for resources held by each other. A semaphore is a synchronization tool that controls access to a shared resource by several processes.";$("#paste").value=S.notes;save();nstat();};
+$("#file").onchange=async e=>{
+  const f=e.target.files[0];if(!f){clearNotes();return;}clearGenerated();$("#nstat").textContent="Reading…";
+  try{let t="";
+    if(f.name.toLowerCase().endsWith(".pdf")){
+      pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+      for(let i=1;i<=d.numPages&&t.length<200000;i++){t+=(await(await d.getPage(i)).getTextContent()).items.map(x=>x.str).join(" ")+"\n";}
+    }else t=await f.text();
+    if(!t.trim()){$("#nstat").textContent="No text found. This PDF may be scanned images, so paste the text instead.";return;}
+    S.notes=t.slice(0,200000);$("#paste").value=S.notes;save();nstat();
+  }catch(err){$("#nstat").textContent="Couldn’t read that file. Try pasting the text instead.";}
+};
+
+// Notes: top-scoring sentences in original order
+$("#n-go").onclick=()=>{const er=$("#n-err");if(need(er))return;const n=nlp();
+  const idx=pick($("#n-topic").value.trim().toLowerCase()).sort((a,b)=>n.sc[b]-n.sc[a]).slice(0,8).sort((a,b)=>a-b);
+  $("#n-out").textContent=idx.map(i=>"- "+n.sents[i]).join("\n")+"\n\nKey terms: "+n.kws.slice(0,10).join(", ");};
+
+// Quiz: fill-in-the-blank, harder levels blank rarer words and use closer distractors
+const lvl=()=>S.levels[$("#q-topic").value.trim().toLowerCase()||"all notes"]||2;
+$("#q-topic").oninput=()=>$("#q-lv").textContent=`Adaptive difficulty for this topic: ${lvl()}/5`;$("#q-topic").oninput();
+let quiz=[],qkey="";
+$("#q-go").onclick=()=>{const er=$("#q-err");er.textContent="";
+  if(!S.notes.trim()){er.textContent="Upload or paste notes first (or press “Load sample notes”).";return;}
+  const t=$("#q-topic").value.trim().toLowerCase(),lv=lvl();qkey=t||"all notes";
+  const toks=x=>(x.toLowerCase().match(/[a-z][a-z-]{3,}/g)||[]).filter(w=>!STOP.has(w));
+  // split notes into usable pieces: sentences, lines, bullets; long runs are cut into ~30-word pieces
+  let chunks=[];
+  S.notes.replace(/\r/g,"\n").split(/(?<=[.!?:;])\s+|\n+|\s[•●▪◦–—]\s/).forEach(p=>{p=p.replace(/\s+/g," ").replace(/^[•●▪◦*–—-]+\s*/,"").trim();if(p.length<15)return;
+    if(p.length<=300)chunks.push(p);else{const w=p.split(" ");for(let i=0;i<w.length;i+=30){const c=w.slice(i,i+30).join(" ");if(c.length>=15)chunks.push(c);}}});
+  if(!chunks.length&&toks(S.notes).length)chunks=[S.notes.replace(/\s+/g," ").trim().slice(0,300)];
+  if(t){const m=chunks.filter(c=>c.toLowerCase().includes(t));if(m.length)chunks=m;}
+  const f={};chunks.forEach(c=>new Set(toks(c)).forEach(w=>f[w]=(f[w]||0)+1));
+  const all=Object.keys(f).sort((a,b)=>f[b]-f[a]||b.length-a.length);
+  if(all.length<2){er.textContent="Your notes have too few real words to quiz on. Add a few more lines.";return;}
+  const cut=x=>x.length>150?x.slice(0,147)+"…":x,cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  const DEF=/^(?:(?:an?|the)\s+)?([A-Za-z][A-Za-z -]{1,40}?)\s+(?:is|are|means|refers to|is defined as|are defined as|states that|describes|provides|allows)\s+(.{20,})$/i;
+  // for every piece: a "term + description" if the sentence defines something, then its keywords as concepts
+  const cand=chunks.map(s=>{const ks=[...new Set(toks(s))].sort((a,b)=>f[b]-f[a]),m=s.replace(/[.!?]+$/,"").match(DEF),L=[];
+    if(m&&m[1].trim().split(" ").length<=5&&!toks(m[2]).some(w=>toks(m[1]).includes(w)))L.push({s,c:m[1].trim().toLowerCase(),d:m[2].trim()});
+    const kk=ks.filter(w=>!/(ing|ed|ly)$/.test(w)),kz=kk.length?kk:ks,base=Math.min(Math.max(0,lv-3),kz.length-1);kz.forEach((_,i)=>L.push({s,c:kz[(base+i)%kz.length]}));return L;}).filter(L=>L.length);
+  const defTerms=cand.map(L=>L[0]).filter(x=>x.d).map(x=>x.c),GEN=["None of these","This isn’t covered in the notes"],nOpt=lv<=2?3:4;
+  quiz=[];const used=new Set();
+  const build=({s,c,d})=>{
+    if(d){ // which concept matches this description?
+      let pool=[...new Set(shuf(defTerms.filter(w=>w!==c&&!d.toLowerCase().includes(w))).concat(shuf(all.filter(w=>w!==c&&!d.toLowerCase().includes(w)))))];
+      if(lv>=4)pool.sort((a,b)=>Math.abs(a.length-c.length)-Math.abs(b.length-c.length));
+      const opts=[cap(c),...pool.slice(0,nOpt-1).map(cap)];
+      return{q:`Which concept is described as: “${cut(d)}”?`,opts,a:cap(c)};}
+    const mine=new Set(toks(s));let pool=chunks.filter(x=>x!==s&&!x.toLowerCase().includes(c)).map(cut);pool=[...new Set(pool)];
+    if(lv>=4)pool.sort((a,b)=>toks(b).filter(w=>mine.has(w)).length-toks(a).filter(w=>mine.has(w)).length);else shuf(pool);
+    const opts=[cut(s),...pool.slice(0,nOpt-1)];for(const g of GEN)if(opts.length<3)opts.push(g);
+    return{q:`Which statement about “${c}” is correct?`,opts,a:cut(s)};};
+  for(let pass=0;pass<12&&quiz.length<5;pass++)for(const L of shuf(cand.slice())){if(quiz.length>=5)break;
+    const it=L[pass];if(!it||used.has(it.c))continue;used.add(it.c);const q=build(it);q.opts=shuf(q.opts);q.c=it.c;q.why=it.s;quiz.push(q);}
+  const box=$("#q-box");box.innerHTML="";
+  quiz.forEach((q,i)=>{const d=E("div","q");d.appendChild(E("b",0,`${i+1}. ${q.q}`));
+    q.opts.forEach(o=>{const l=E("label"),r=E("input");r.type="radio";r.name="q"+i;r.value=o;l.append(r," "+o);d.appendChild(l);});
+    const w=E("div","mut");w.id="w"+i;d.appendChild(w);box.appendChild(d);});
+  const sb=E("button","go","Submit"),res=E("div");res.id="q-res";sb.onclick=submitQuiz;box.append(sb,res);};
+function submitQuiz(){let c=0;
+  quiz.forEach((q,i)=>{const p=document.querySelector(`input[name=q${i}]:checked`),ok=p&&p.value===q.a;if(ok)c++;else S.weak[q.c]=(S.weak[q.c]||0)+1;
+    const w=$("#w"+i);w.className=ok?"good":"bad";w.style.whiteSpace="pre-wrap";w.textContent=(ok?"✓ ":`✗ Correct answer: ${q.a}\n`)+"From your notes: "+q.why;});
+  const acc=c/quiz.length,lv=S.levels[qkey]||2;S.levels[qkey]=acc>=.8?Math.min(5,lv+1):acc<=.4?Math.max(1,lv-1):lv;
+  S.quizzes.push({d:today(),t:qkey,c,n:quiz.length});save();
+  $("#q-res").textContent=`Score: ${c}/${quiz.length}. Next difficulty: ${S.levels[qkey]}/5`;$("#q-topic").oninput();}
+
+// Chat: finds the best matching sentences in your notes and reveals them step by step
+function ask(){const er=$("#c-err"),q=$("#c-in").value.trim();if(!q||need(er))return;$("#c-in").value="";const n=nlp(),qt=new Set(n.toks(q));
+  const hits=n.sents.map((s,i)=>[n.toks(s).reduce((a,w)=>a+(qt.has(w)?1/Math.log(2+n.f[w]):0),0),i]).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>n.sents[x[1]]);
+  $("#c-log").appendChild(E("div","msg u",q));const card=E("div","msg");$("#c-log").appendChild(card);
+  if(!hits.length){card.textContent="I couldn’t find that in your notes. Try different words from your material.";return;}
+  const rec={d:today(),full:false};S.chats.push(rec);save();
+  const terms=[...new Set(hits.flatMap(h=>n.toks(h)))].filter(w=>!qt.has(w)).sort((a,b)=>n.f[b]-n.f[a]);
+  const steps=[`Hint 1: think about ${terms.slice(0,3).join(", ")}.`,`Hint 2: ${mask(hits[0],terms[0]||"xxxx")}`,"Full answer from your notes:\n- "+hits.join("\n- ")];
+  let k=0;const txt=E("div",0,steps[0]),b1=E("button",0,"Next hint"),b2=E("button",0,"Show full answer");
+  b1.onclick=()=>{k=Math.min(k+1,1);txt.textContent=steps.slice(0,k+1).join("\n");};
+  b2.onclick=()=>{txt.textContent=steps.join("\n");rec.full=true;save();b1.hidden=b2.hidden=true;};
+  card.append(txt,b1," ",b2);}
+$("#c-go").onclick=ask;$("#c-in").onkeydown=e=>{if(e.key==="Enter")ask();};
+
+// Visuals
+const tree=(t,kids)=>{const li=E("li"),b=E("b",0,t);li.appendChild(b);if(kids&&kids.length){const ul=E("ul");kids.forEach(k=>ul.appendChild(k));li.appendChild(ul);}return li;};
+$("#v-go").onclick=()=>{const er=$("#v-err"),o=$("#v-out");o.innerHTML="";if(need(er))return;const n=nlp(),t=$("#v-topic").value.trim().toLowerCase(),idx=pick(t);
+  if($("#v-kind").value==="map"){
+    const ks=[...new Set(idx.flatMap(i=>n.toks(n.sents[i])))].sort((a,b)=>n.f[b]-n.f[a]).slice(0,6);
+    const kids=ks.map(k=>{const co=[...new Set(idx.filter(i=>n.sents[i].toLowerCase().includes(k)).flatMap(i=>n.toks(n.sents[i])))].filter(w=>w!==k).sort((a,b)=>n.f[b]-n.f[a]).slice(0,3);return tree(k,co.map(c=>tree(c)));});
+    const ul=E("ul");ul.style.cssText="border:0;padding:0";ul.appendChild(tree(t||"Your notes",kids));o.appendChild(ul);
+  }else{
+    idx.sort((a,b)=>n.sc[b]-n.sc[a]);idx.splice(6);idx.sort((a,b)=>a-b);
+    idx.forEach((i,j)=>{if(j)o.appendChild(E("div","arrow","↓"));const s=n.sents[i];o.appendChild(E("div","step",s.length>110?s.slice(0,107)+"…":s));});}};
+
+// Report
+function repData(){const m=today().slice(0,7),qs=S.quizzes.filter(q=>q.d.slice(0,7)===m),by={};
+  qs.forEach(q=>{(by[q.t]=by[q.t]||[0,0]);by[q.t][0]+=q.c;by[q.t][1]+=q.n;});
+  const wk=new Date(Date.now()-7*864e5).toISOString().slice(0,10),rc=S.chats.filter(c=>c.d>=wk),fs=rc.filter(c=>c.full).length,
+    half=Math.floor(qs.length/2),rate=a=>a.reduce((x,q)=>x+q.c,0)/a.reduce((x,q)=>x+q.n,0);
+  return{m,by,rc,fs,growth:qs.length>=2?rate(qs.slice(half))-rate(qs.slice(0,half)):null,alert:rc.length>40||(rc.length>=5&&fs/rc.length>.5),
+    weak:Object.entries(S.weak).sort((a,b)=>b[1]-a[1]).slice(0,8),
+    cov:S.syllabus.split(/\n|;/).map(x=>x.trim()).filter(Boolean).map(l=>{const t=nlp().toks(l);return[l,t.length?t.filter(w=>nlp().f[w]).length/t.length:0];})};}
+function report(){const r=repData(),o=$("#r-out");o.innerHTML="";
+  const add=(t,c)=>o.appendChild(E("p",c,t));
+  if(!Object.keys(r.by).length)add("Take some quizzes first.","mut");
+  Object.entries(r.by).forEach(([t,[c,n]])=>{const a=c/n,d=E("div");d.style.margin="8px 0";d.appendChild(E("div",0,`${t}: ${Math.round(a*100)}%`+(a<.6?"  ⚠ weak topic":"")));
+    const b=E("div","bar"),i=E("i");i.style.width=a*100+"%";b.appendChild(i);d.appendChild(b);o.appendChild(d);});
+  if(r.growth!==null)add(`Performance growth this month: ${r.growth>=0?"+":""}${Math.round(r.growth*100)}%`);
+  if(r.weak.length)add("Weak terms (most missed): "+r.weak.map(([w,c])=>`${w} (${c})`).join(", "));
+  if(r.alert)add(`⚠ Heavy shortcut use: ${r.rc.length} questions this week, ${r.fs} used the full answer. Try the hints first.`,"warn");
+  if(r.cov.length){add("Syllabus coverage by your notes:");r.cov.forEach(([l,v])=>add((v>=.5?"✓ ":"✗ ")+l,v>=.5?"good":"bad"));}}
+$("#r-dl").onclick=()=>{const r=repData();let t=`ExamPrep report ${r.m}\n`;
+  Object.entries(r.by).forEach(([k,[c,n]])=>t+=`${k}: ${Math.round(c/n*100)}% (${c}/${n})\n`);
+  if(r.weak.length)t+="Weak terms: "+r.weak.map(x=>x[0]).join(", ")+"\n";if(r.alert)t+="ALERT: heavy shortcut use\n";
+  r.cov.forEach(([l,v])=>t+=`${v>=.5?"covered":"MISSING"}: ${l}\n`);
+  const a=E("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));a.download=`report_${r.m}.txt`;a.click();};
+$("#r-clr").onclick=()=>{if(confirm("Delete all quiz and chat history?")){S.quizzes=[];S.levels={};S.chats=[];S.weak={};save();report();$("#q-topic").oninput();}};
+
+// Study room: same meeting code = same free Jitsi Meet video room
+const rmCode=()=>$("#rm-code").value.replace(/[^A-Za-z0-9-]/g,"");
+const rmMsg=t=>$("#rm-info").textContent=t;
+$("#rm-new").onclick=()=>{$("#rm-code").value=Math.random().toString(36).slice(2,8).toUpperCase();rmMsg("Your code is ready. Press Join, then copy the invite link for your group.");};
+$("#rm-join").onclick=()=>{const c=rmCode();if(c.length<3){rmMsg("Enter a meeting code with at least 3 letters or numbers.");return;}
+  window.open("https://meet.jit.si/ExamPrep-"+c,"_blank","noopener");rmMsg(`Opened room “${c}” in a new tab. Allow camera and microphone there if you want them.`);};
+$("#rm-copy").onclick=async()=>{const c=rmCode();if(c.length<3){rmMsg("Enter or create a meeting code first.");return;}
+  const link=location.href.split("#")[0]+"#room="+c;try{await navigator.clipboard.writeText(link);rmMsg("Invite link copied. Friends who open it get the code filled in.");}catch(e){rmMsg("Copy this link: "+link);}};
+const hm=location.hash.match(/room=([A-Za-z0-9-]+)/);if(hm){$("#rm-code").value=hm[1];$("#tabs").children[6].click();}
+</script>
+</body>
+</html>
